@@ -92,6 +92,10 @@ h1.title {
 .score-container:after {
   content: "Score"; }
 
+.best-container {
+  display: none;
+  }
+
 .best-container:after {
   content: "Best"; }
 
@@ -116,7 +120,7 @@ hr {
   margin-bottom: 30px; }
 
 .container {
-  width: 500px;
+  width: 600px;
   margin: 0 auto; }
 
 @-webkit-keyframes fade-in {
@@ -151,11 +155,35 @@ hr {
   touch-action: none;
   background: #bbada0;
   border-radius: 6px;
-  width: 380px;
+  width: 600px;
   height: 380px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box; }
+
+  .game-container .high-scores {
+    float: right;
+    width: 205px;
+    height: 350px;
+    background: rgba(238, 228, 218, 0.85);
+    border-radius: 6px; }
+	
+    .game-container .high-scores p {
+      font-size: 16px;
+      font-weight: bold;
+      height: 140px;
+      line-height: 20px;
+      margin-top: 0px;
+      margin-left: 20px;
+      margin-right: 10px; }
+
+      .game-container .high-scores p.heading {
+	 font-size: 24px;
+	 height: 30px;
+	 margin-top: 15px;
+	 margin-bottom: -28px;
+      }
+
   .game-container .game-message {
     display: none;
     position: absolute;
@@ -174,14 +202,20 @@ hr {
     animation-fill-mode: both; }
 
     .game-container .game-message p {
-      font-size: 26px;
+      font-size: 30px;
       font-weight: bold;
-      height: 20px;
-      line-height: 26px;
+      height: 30px;
+      line-height: 30px;
       margin-top: 30px; }
+      
+      .game-container .game-message p.heading {
+	 margin-bottom: -45px;
+	 font-size: 40px;
+      }
+
     .game-container .game-message .lower {
       display: block;
-      margin-top: 240px; }
+      margin-top: 190px; }
     .game-container .game-message a {
       display: inline-block;
       background: #8f7a66;
@@ -191,14 +225,21 @@ hr {
       color: #f9f6f2;
       height: 40px;
       line-height: 42px;
-      margin-left: 9px; }
+      margin-left: 19px; }
+
+    .game-container .game-message .lowerer {
+      display: block;
+      margin-top: 10px; }
   
     
       .game-container .game-message a.keep-playing-button {
         display: none; }
     .game-container .game-message.game-won {
-      background: rgba(237, 194, 46, 0.5);
+      background: rgba(237, 204, 56, 0.8);
       color: #f9f6f2; }
+    .game-container .game-message.game-won p {
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+    }
       .game-container .game-message.game-won a.keep-playing-button {
         display: inline-block; }
     .game-container .game-message.game-won, .game-container .game-message.game-over {

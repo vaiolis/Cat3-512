@@ -1,49 +1,30 @@
-subjectName=prompt("Please enter your name",""); 
-//temp subject- will need to get this from user input at the beginning of game
-  
-  var xmlhttp0;
-  xmlhttp0=new XMLHttpRequest();
-  xmlhttp0.open('GET', "https://dl.dropboxusercontent.com/s/m81yy3hjyjcjntw/randomNames.txt?dl=1&token_hash=AAGMkr4jMfCdyyRsQrEJNH1VHcHeuvMdqaz6PRFid669hA&expiry=1401136918", false);
-  xmlhttp0.send();
-  var randomNameList=xmlhttp0.responseText.split("\n"); //stores a random list of people 
-  var indexOfSubjectInRandomNameList=randomNameList.indexOf(subjectName);
-  if (indexOfSubjectInRandomNameList>-1)
-  {
-    randomNameList.splice(indexOfSubjectInRandomNameList,1); //removes your own name 
-  }
-  var xmlhttp1;
-  xmlhttp1=new XMLHttpRequest();
-  xmlhttp1.open('GET', "https://dl.dropboxusercontent.com/s/lz1udt9fwmi6fru/subjectNameList.txt?dl=1&token_hash=AAH_FJzXm3LhzigT2WuXrGjmtqxFl6BVWSTFCmuVKAzwxA&expiry=1401142866", false);
-  xmlhttp1.send();
-  var subjectNameList=xmlhttp1.responseText.split("\n"); //a list of subjects involved in test
-  var indexOfSubject=subjectNameList.indexOf(subjectName); //get index of subject 
-  
-  var xmlhttp2;
-  xmlhttp2=new XMLHttpRequest();
-  xmlhttp2.open('GET', "https://dl.dropboxusercontent.com/s/lnw78htd9dacchn/firstDegreeArray.txt?dl=1&token_hash=AAGUgvM5gz8qgdSchSw6b7zpiLNomqlBLLQbQlDmi9qjMA&expiry=1401143028", false);
-  xmlhttp2.send();
-  var firstDegreeArray=xmlhttp2.responseText.split("\n"); //big 2D array of every subject's firstDegree connections
-  var subjectFirstDegreeArray=firstDegreeArray[indexOfSubject].split("~"); 
-  
-  var xmlhttp3;
-  xmlhttp3=new XMLHttpRequest();
-  xmlhttp3.open('GET', "https://dl.dropboxusercontent.com/s/hyfqi58mabbxocq/secondDegreeArray.txt?dl=1&token_hash=AAEAQHz0XLvhH_j3aCe2CzxHydRvIW8ISsYztwklc15Sng&expiry=1401143263", false);
-  xmlhttp3.send();
-  var secondDegreeArray=xmlhttp3.responseText.split("\n"); 
-  var subjectSecondDegreeArray=secondDegreeArray[indexOfSubject].split("~");
-
-  var firstDegreeCount=0; //stores how many first degree connections are displayed 
-  var secondDegreeCount=0; //stores how many second degree connections are displayed 
-  
-
-
 function HTMLActuator() {
   this.tileContainer    = document.querySelector(".tile-container");
   this.scoreContainer   = document.querySelector(".score-container");
   this.bestContainer    = document.querySelector(".best-container");
   this.messageContainer = document.querySelector(".game-message");
+  this.hsContainer      = document.querySelector(".high-scores");
   
-  
+  this.rsScores = [300, 400, 500, 200, 100];
+  this.hsScores = [500, 400, 300, 200, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  this.rsNames = ["Mingyi", "Spencer", "Steven", "Xiqi", "Harrison"];
+  this.hsNames = ["Steven", "Xiqi", "Mingyi", "Spencer", "Harrison", "None", "None", "None", "None", "None", "None", "None", "None", "None", "None"];
+  this.submittedScore = false;
+
+  this.loadHighScores();
+}
+
+//Load high scores
+HTMLActuator.prototype.loadHighScores = function () {
+  var self = this;
+  var message = "";
+
+  for (var i = 0; i < 15; i++)
+  {
+     message = message + "\n" + (i+1) + ") " + self.hsNames[i] + ": " + self.hsScores[i];
+  }
+
+  this.hsContainer.getElementsByTagName("p")[1].innerText = message;
 }
 
 HTMLActuator.prototype.actuate = function (grid, metadata) {
@@ -76,43 +57,78 @@ HTMLActuator.prototype.actuate = function (grid, metadata) {
 
 // Continues the game (both restart and keep playing)
 HTMLActuator.prototype.continueGame = function () {
+  var self = this;
+  self.submittedScore = false;
   this.clearMessage();
-var index1=0;
-    if(firstDegreeCount==0)
-  {
-    index1=1;
-  }
-  else if(firstDegreeCount==1)
-  {
-    index1=7;
-  }
-  else if(firstDegreeCount==2)
-  {
-    index1=12;
-  }
-  else if(firstDegreeCount==3)
-  {
-    index1=16;
-  }
-  else if(firstDegreeCount==4)
-  {
-    index1=19;
-  }
-  else if(firstDegreeCount==5)
-  {
-    index1=21;
-  }
-  
-  index1=index1+secondDegreeCount+1;
- indexOfSubject+=2;
-  
-   var xmlhttp4;
-  xmlhttp4=new XMLHttpRequest();
-  xmlhttp4.open('POST', "http://128.54.186.34:1337/?row="+indexOfSubject+"&col="+index1, true);
-  xmlhttp4.send();
-  firstDegreeCount=0;
-  secondDegreeCount=0;
 };
+
+// Updates high scores?
+HTMLActuator.prototype.updateHighScores = function (score) {
+  var self = this;
+
+  if (self.submittedScore == false)
+  {
+     var name = prompt("Please enter your name (max 10 characters)", "Enter name here");
+     var rsMessage= "\nRecent Scores";
+     var hsMessage= "";
+     var doneSearching = false;
+
+     var hsPosition = 15;
+
+     //truncate name
+     name = name.substring(0, 10);
+
+     //Determine high score positioning
+     while (hsPosition > 0 && doneSearching == false)
+     {
+       if (self.hsScores[hsPosition-1] < score)
+	  hsPosition--;
+       else
+	  doneSearching = true;
+     }
+
+     //Update high scores ranking
+     for (var i = 14; i > hsPosition; i--)
+     {
+       self.hsScores[i] = self.hsScores[i-1];
+       self.hsNames[i] = self.hsNames[i-1];
+     }
+
+     if (hsPosition < 15)
+     {
+       self.hsNames[hsPosition] = name;
+       self.hsScores[hsPosition] = score;
+     } // end
+
+     //Update recent scores
+     for (var i = 4; i > 0; i--)
+     {
+       self.rsNames[i] = self.rsNames[i-1];
+       self.rsScores[i] = self.rsScores[i-1];
+     }
+
+     self.rsNames[0] = name;
+     self.rsScores[0] = score;
+
+     //Format strings
+     for (var i = 0; i < 5; i++)
+     {
+       rsMessage = rsMessage+"\n"+ self.rsNames[i] + ": " + self.rsScores[i];
+     }
+
+     for (var i = 0; i < 15; i++)
+     {
+       hsMessage = hsMessage + "\n" + (i+1) + ") " + self.hsNames[i] + ": " + self.hsScores[i];
+     }
+
+     //Update HTML elements
+     this.hsContainer.getElementsByTagName("p")[1].innerText = hsMessage;
+
+     this.messageContainer.getElementsByTagName("p")[1].innerText = rsMessage;
+
+     self.submittedScore = true;
+  }
+}
 
 HTMLActuator.prototype.clearContainer = function (container) {
   while (container.firstChild) {
@@ -131,7 +147,7 @@ HTMLActuator.prototype.addTile = function (tile) {
   // We can't use classlist because it somehow glitches when replacing classes
   var classes = ["tile", "tile-" + tile.value, positionClass];
 
-  if (tile.value > 2048) classes.push("tile-super");
+  if (tile.value > 512) classes.push("tile-super");
 
   this.applyClasses(wrapper, classes);
 
@@ -199,106 +215,28 @@ HTMLActuator.prototype.updateBestScore = function (bestScore) {
 };
 
 HTMLActuator.prototype.message = function (won) {
-  var gameOverMessage= "Game Over"+String.fromCharCode(13)+String.fromCharCode(13)+"Recent Scores"+String.fromCharCode(13);
-  
- 
-  
-  var randomNameListLength=randomNameList.length; 
-  var random1=Math.random(); // <0.5 first degree has lower scores, otherwise lower scores
-  var random2=Math.random(); // same goes for second degree scores
-  var random3=Math.random(); // same goes for stranger scores 
-  var firstDegreeHigherScore;
-  var secondDegreeHigherScore;
-  var strangerHigherScore; 
-  if(random1<0.1)
-  {
-      firstDegreeHigherScore=false; //record in final data recording 
-  }
-  else
-  {
-      firstDegreeHigherScore=true; //record in final data recording
-  }
-  
-  if(random2<0.1)
-  {
-    secondDegreeHigherScore=false; //Record in final data recording
-  }
-  else
-  {
-    secondDegreeHigherScore=true; //Record in final data recording
-  }
-  
-  if(random3<0.1)
-  {
-    strangerHigherScore=false; //Record in final data recording
-  }
-  else
-  {
-    strangerHigherScore=true; //Record in final data recording
-  }
-  
-  
+  var self = this;
+  var rsMessage= "\nRecent Scores";
 
-  var strangerCount=0;
-  
- for (var i = 0; i <5; i++) 
-{ 
-  var randomNameIndex=~~(Math.random()*randomNameListLength);
-  var selectedRandomName=randomNameList[randomNameIndex];
-  var nameAndScore=(String.fromCharCode(13)+selectedRandomName);
-  if(subjectFirstDegreeArray.indexOf(selectedRandomName)>-1) //check if the selected name is first degree
+  for (var i = 0; i < 5; i++)
   {
-    if(firstDegreeHigherScore==true)
-    {
-      nameAndScore+=(" "+(this.score+(~~(Math.random()*(this.score)))));
-    }
-    else
-    {
-      nameAndScore+=(" "+(this.score-(~~(Math.random()*(this.score)*0.8))));
-    }
-    firstDegreeCount++;
+    rsMessage = rsMessage+"\n"+ self.rsNames[i] + ": " + self.rsScores[i];
   }
-  else if(subjectSecondDegreeArray.indexOf(selectedRandomName)>-1)  //check if selected name is second degree
-  {
-    if(secondDegreeHigherScore==true)
-    {
-      nameAndScore+=(" "+(this.score+(~~(Math.random()*(this.score)))));
-    }
-    else
-    {
-      nameAndScore+=(" "+(this.score-(~~(Math.random()*(this.score)*0.8))));
-    }
-    secondDegreeCount++;
-  }
-  else                                                          //stranger 
-  {
-   if(strangerHigherScore==true)
-    {
-      nameAndScore+=(" "+(this.score+(~~(Math.random()*(this.score)))));
-    }
-    else
-    {
-      nameAndScore+=(" "+(this.score-(~~(Math.random()*(this.score)*0.8))));
-    } 
-    strangerCount++;
-  }
-  gameOverMessage+=nameAndScore;
-}
-
 
   var type    = won ? "game-won" : "game-over";
-  var message = won ? "You win!" : gameOverMessage;
+  var message = won ? "You win!" : "Game over!";
   
 
   this.messageContainer.classList.add(type);
   this.messageContainer.getElementsByTagName("p")[0].innerText = message;
+  this.messageContainer.getElementsByTagName("p")[1].innerText = rsMessage;
+
+
 };
 
 HTMLActuator.prototype.clearMessage = function () {
   // IE only takes one value to remove at a time.
   this.messageContainer.classList.remove("game-won");
   this.messageContainer.classList.remove("game-over");
-  var index1;
-
 };
 
