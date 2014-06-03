@@ -127,6 +127,8 @@ HTMLActuator.prototype.updateHighScores = function (score) {
      this.messageContainer.getElementsByTagName("p")[1].innerText = rsMessage;
 
      self.submittedScore = true;
+  } else {
+     alert("You have already submitted a high score.  Start a new game to submit again!");
   }
 }
 
